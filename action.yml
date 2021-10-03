@@ -14,12 +14,9 @@ inputs:
     description:
       'A list of changed files.'
 outputs:
-  summary-title:
-    description:
-      'The title of the RSI diff action.'
   summary-details:
     description:
-      'A detailed summary of all the states that changed.'
+      'A detailed summary of all the states that changed in Markdown.'
 runs:
   using: 'docker'
   image: 'Dockerfile'
