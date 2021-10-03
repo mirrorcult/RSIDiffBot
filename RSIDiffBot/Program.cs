@@ -12,7 +12,7 @@ using static CommandLine.Parser;
 static async Task StartDiffAsync(ActionInputs inputs)
 {
     // https://docs.github.com/actions/reference/workflow-commands-for-github-actions#setting-an-output-parameter
-    var summary = "**Hello**\n*Test*";
+    var summary = "**RSI Diff Bot**//$'\n'/'%0A**MultilineTest**";
 
     Console.WriteLine($"modified {inputs.Modified}");
     Console.WriteLine($"removed {inputs.Removed}");
