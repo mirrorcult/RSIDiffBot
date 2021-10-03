@@ -71,8 +71,16 @@ jobs:
           echo 'steps.files.outputs.added_modified=${{ steps.files.outputs.added_modified }}'
        
       - name: Diff changed RSIs
+        id: diff
         uses: ./
         with:
           modified: ${{ steps.files.outputs.modified }}
           removed: ${{ steps.files.outputs.removed }}
           added: ${{ steps.files.outputs.added }}
+          
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: 1
+          body: ${{ steps.diff.outputs.summary-details
+          
