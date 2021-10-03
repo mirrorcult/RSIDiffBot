@@ -6,7 +6,7 @@ COPY . ./
 RUN dotnet publish ./RSIDiffBot/RSIDiffBot.csproj -c Release -o out --no-self-contained
 
 # Label the container
-LABEL maintainer="Kara D. <lunarautomaton6@gmail.com>
+LABEL maintainer="Kara D. <lunarautomaton6@gmail.com>"
 LABEL repository="https://github.com/mirrorcult/RSIDiffBot"
 LABEL homepage="https://github.com/mirrorcult/RSIDiffBot"
 
