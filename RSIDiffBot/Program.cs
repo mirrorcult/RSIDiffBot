@@ -18,7 +18,7 @@ static async Task StartDiffAsync(ActionInputs inputs)
     Console.WriteLine($"removed {inputs.Removed}");
     Console.WriteLine($"added {inputs.Added}");
     
-    Console.WriteLine($"::set-output name=updated-metrics::{summary}");
+    Console.WriteLine($"::set-output name=summary-details::{summary}");
 
     Environment.Exit(0);
 }
