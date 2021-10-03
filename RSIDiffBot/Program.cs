@@ -8,64 +8,6 @@ using RSIDiffBot;
 using static CommandLine.Parser;
 using static RSIDiffBot.Const;
 
-static async Task StartDiffAsync(ActionInputs inputs)
-{
-    // you can't just do '\n' because github actions for some reason
-    // truncates every newline..
-
-    Console.WriteLine($"modified {inputs.Modified}");
-    Console.WriteLine($"removed {inputs.Removed}");
-    Console.WriteLine($"added {inputs.Added}");
-
-    List<ChangedState> states = new List<ChangedState>()
-    {
-        new ChangedState("test_state", "", "b"),
-        new ChangedState("test_state_2", "a", "b"),
-        new ChangedState("test_state_3", "b", "")
-    };
-
-    var summary = WrapInCollapsible(CreateTable(states), "test.rsi");
-    
-    Console.WriteLine($"::set-output name=summary-details::{summary}");
-
-    Environment.Exit(0);
-}
-
-// Wraps some string in GitHub collapsible markdown
-static string WrapInCollapsible(string markdown, string title)
-{
-    var str = $@"<details><summary>{title}</summary>{nl}<p>" + markdown;
-    return str + $@"</p>{nl}</details>";
-}
-
-static string CreateTable(IEnumerable<ChangedState> states)
-{
-    var str = $@"| State | Old | New | Status{nl}| --- | --- | --- | --- |{nl}";
-    
-    
-    foreach (var state in states)
-    {
-        var status = ModifiedType.Modified;
-        if(state.OldStatePath == string.Empty)
-            status = ModifiedType.Added;
-        else if (state.NewStatePath == String.Empty) 
-            status = ModifiedType.Removed;
-        
-        str += $@"| {state.Name} | {state.OldStatePath} | {state.NewStatePath} | {status}{nl}";
-    }
-
-    return str;
-}
-
-var parser = Default.ParseArguments<ActionInputs>(() => new(), args);
-parser.WithNotParsed(
-    _ =>
-    {
-        Environment.Exit(2);
-    });
-
-await parser.WithParsedAsync(options => StartDiffAsync(options));
-
 namespace RSIDiffBot
 {
     internal enum ModifiedType
@@ -92,5 +34,70 @@ namespace RSIDiffBot
     public static class Const
     {
         public const string nl = @"%0A";
+    }
+
+    public static class RSIDiffBot
+    {
+        static async Task StartDiffAsync(ActionInputs inputs)
+        {
+            // you can't just do '\n' because github actions for some reason
+            // truncates every newline..
+
+            Console.WriteLine($"modified {inputs.Modified}");
+            Console.WriteLine($"removed {inputs.Removed}");
+            Console.WriteLine($"added {inputs.Added}");
+
+            List<ChangedState> states = new List<ChangedState>()
+            {
+                new ChangedState("test_state", "", "b"),
+                new ChangedState("test_state_2", "a", "b"),
+                new ChangedState("test_state_3", "b", "")
+            };
+
+            var title = $@"This PR makes changes to 1 or more RSIs. Here is a summary of all changes:{nl}{nl}";
+            var summary = title + WrapInCollapsible(CreateTable(states), "test.rsi");
+
+            Console.WriteLine($"::set-output name=summary-details::{summary}");
+
+            Environment.Exit(0);
+        }
+
+        // Wraps some string in GitHub collapsible markdown
+        static string WrapInCollapsible(string markdown, string title)
+        {
+            var str = $@"<details><summary>{title}</summary>{nl}<p>{nl}{nl}" + markdown;
+            return str + $@"{nl}{nl}</p>{nl}</details>";
+        }
+
+        static string CreateTable(IEnumerable<ChangedState> states)
+        {
+            var str = $@"| State | Old | New | Status{nl}| --- | --- | --- | --- |{nl}";
+
+            foreach (var state in states)
+            {
+                var status = ModifiedType.Modified;
+                if (state.OldStatePath == string.Empty)
+                    status = ModifiedType.Added;
+                else if (state.NewStatePath == String.Empty)
+                    status = ModifiedType.Removed;
+
+                str += $@"| {state.Name} | {state.OldStatePath} | {state.NewStatePath} | {status}{nl}";
+            }
+
+            return str;
+        }
+
+        static async Task Main(string[] args)
+        {
+            var parser = Default.ParseArguments<ActionInputs>(() => new(), args);
+            parser.WithNotParsed(
+                _ =>
+                {
+                    Environment.Exit(2);
+                });
+
+
+            await parser.WithParsedAsync(options => StartDiffAsync(options));
+        }
     }
 }
