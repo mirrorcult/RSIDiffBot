@@ -4,10 +4,15 @@ branding:
   icon: columns
   color: green
 inputs:
-  files:
+  modified:
+    description:
+      'A list of modified files.'
+  removed:
+    description:
+      'A list of removed files.'
+  added:
     description:
       'A list of changed files.'
-    required: true
 outputs:
   summary-title:
     description:
@@ -15,12 +20,13 @@ outputs:
   summary-details:
     description:
       'A detailed summary of all the states that changed.'
-  showed-changes:
-    description:
-      'A boolean value, indicating whether or not the diff showed any changes.'
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-  - '-f'
-  - ${{ inputs.files }}
+  - '-m'
+  - ${{ inputs.modified }}
+  - '-r'
+  - ${{ inputs.removed }}
+  - '-a'
+  - ${{ inputs.added }}
