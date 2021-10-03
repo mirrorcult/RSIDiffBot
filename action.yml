@@ -1,0 +1,26 @@
+name: 'RSI Diff Bot'
+description: 'Shows modified states in any changed Robust Station Images.'
+branding:
+  icon: columns
+  color: green
+inputs:
+  files:
+    description:
+      'A list of changed files.'
+    required: true
+outputs:
+  summary-title:
+    description:
+      'The title of the RSI diff action.'
+  summary-details:
+    description:
+      'A detailed summary of all the states that changed.'
+  showed-changes:
+    description:
+      'A boolean value, indicating whether or not the diff showed any changes.'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+  - '-f'
+  - ${{ inputs.files }}
