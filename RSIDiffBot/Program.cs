@@ -11,13 +11,15 @@ using static CommandLine.Parser;
 
 static async Task StartDiffAsync(ActionInputs inputs)
 {
-
-
     // https://docs.github.com/actions/reference/workflow-commands-for-github-actions#setting-an-output-parameter
     /*Console.WriteLine($"::set-output name=updated-metrics::{statesChanged}");
     Console.WriteLine($"::set-output name=summary-title::{title}");
     Console.WriteLine($"::set-output name=summary-details::{summary}");*/
 
+    Console.WriteLine($"modified {inputs.Modified}");
+    Console.WriteLine($"removed {inputs.Removed}");
+    Console.WriteLine($"added {inputs.Added}");
+    
     Environment.Exit(0);
 }
 

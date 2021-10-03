@@ -69,3 +69,10 @@ jobs:
           echo 'steps.files.outputs.removed=${{ steps.files.outputs.removed }}'
           echo 'steps.files.outputs.renamed=${{ steps.files.outputs.renamed }}'
           echo 'steps.files.outputs.added_modified=${{ steps.files.outputs.added_modified }}'
+       
+      - name: Diff changed RSIs
+        uses: ./
+        with:
+          modified: ${{ steps.files.outputs.modified }}
+          removed: ${{ steps.files.outputs.removed }}
+          added: ${{ steps.files.outputs.added }}
