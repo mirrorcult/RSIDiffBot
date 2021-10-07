@@ -38,7 +38,6 @@ namespace RSIDiffBot
         static async Task StartDiffAsync(ActionInputs inputs)
         {
             var rsiStates = new Dictionary<string, List<ChangedState>>();
-            Console.WriteLine("ahhh");
 
             var mod = inputs.Modified.Split(" ");
             var rem = inputs.Removed.Split(" ");
@@ -53,11 +52,15 @@ namespace RSIDiffBot
                 Console.WriteLine("yes");
                 var rsi = Path.GetDirectoryName(state) ?? "fuck";
                 var list = rsiStates.GetValueOrDefault(rsi);
-                list?.Add(new ChangedState(
-                    Path.GetFileNameWithoutExtension(state),
-                    GetGitHubRawImageLink(inputs.BaseName, inputs.BaseSha, state),
-                    GetGitHubRawImageLink(inputs.HeadName, inputs.HeadSha, state))
-                );
+                if (list != null)
+                {
+                    list.Add(new ChangedState(
+                        Path.GetFileNameWithoutExtension(state),
+                        GetGitHubRawImageLink(inputs.BaseName, inputs.BaseSha, state),
+                        GetGitHubRawImageLink(inputs.HeadName, inputs.HeadSha, state))
+                    );
+                    rsiStates[rsi] = list;
+                }
             }
 
             foreach (var state in rem)
@@ -68,11 +71,15 @@ namespace RSIDiffBot
                 Console.WriteLine("yes");
                 var rsi = Path.GetDirectoryName(state) ?? "fuck";
                 var list = rsiStates.GetValueOrDefault(rsi);
-                list?.Add(new ChangedState(
-                    Path.GetFileNameWithoutExtension(state),
-                    GetGitHubRawImageLink(inputs.BaseName, inputs.BaseSha, state),
-                    null)
-                );
+                if (list != null)
+                {
+                    list.Add(new ChangedState(
+                        Path.GetFileNameWithoutExtension(state),
+                        GetGitHubRawImageLink(inputs.BaseName, inputs.BaseSha, state),
+                        null)
+                    );
+                    rsiStates[rsi] = list;  
+                }
             }
             
             foreach (var state in add)
@@ -83,11 +90,15 @@ namespace RSIDiffBot
                 Console.WriteLine("yes");
                 var rsi = Path.GetDirectoryName(state) ?? "fuck";
                 var list = rsiStates.GetValueOrDefault(rsi);
-                list?.Add(new ChangedState(
-                    Path.GetFileNameWithoutExtension(state),
-                    null, 
-                    GetGitHubRawImageLink(inputs.HeadName, inputs.HeadSha, state))
-                );
+                if (list != null)
+                {
+                    list.Add(new ChangedState(
+                        Path.GetFileNameWithoutExtension(state),
+                        null, 
+                        GetGitHubRawImageLink(inputs.HeadName, inputs.HeadSha, state))
+                    );
+                    rsiStates[rsi] = list;
+                }
             }
 
             var summary = $@"RSI Diff Bot; head commit {inputs.HeadSha} merging into {inputs.BaseSha}{Nl}";
