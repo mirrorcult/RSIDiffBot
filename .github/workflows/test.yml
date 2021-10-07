@@ -1,11 +1,10 @@
-name: Test
+name: Diff RSIs
 
 on:
   pull_request:
-  push:
-    branches:
-      - master
-      - releases/*
+    paths:
+      - '*.rsi'
+      - '*.RSI'
 
 jobs:
   debug:
@@ -77,11 +76,15 @@ jobs:
           modified: ${{ steps.files.outputs.modified }}
           removed: ${{ steps.files.outputs.removed }}
           added: ${{ steps.files.outputs.added }}
+          basename: ${{ github.event.pull_request.base.repo.full_name }}
+          basesha: ${{ github.event.pull_request.base.sha }}
+          headname: ${{ github.event.pull_request.head.repo.full_name }}
+          headsha: ${{ github.event.pull_request.head.sha }}
           
       - name: Create comment
         uses: peter-evans/create-or-update-comment@v1
         with:
-          issue-number: 1
+          issue-number: ${{ github.event.number }}
           body: |
             ${{ steps.diff.outputs.summary-details }}
           

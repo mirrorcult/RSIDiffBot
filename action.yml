@@ -13,6 +13,18 @@ inputs:
   added:
     description:
       'A list of changed files.'
+  basename:
+    description:
+      'The base repository's full name, {username}/{reponame}.'
+  basesha:
+    description:
+      'The base branch's commit hash.'
+  headname:
+    description:
+      'The head repository's full name, {username}/{reponame}.'
+  headsha:
+    description:
+      'The head branch's commit hash.'
 outputs:
   summary-details:
     description:
@@ -27,3 +39,11 @@ runs:
   - ${{ inputs.removed }}
   - '-a'
   - ${{ inputs.added }}
+  - '--bn'
+  - ${{ inputs.baseowner }}
+  - '--bs'
+  - ${{ inputs.basesha }}
+  - '--hn'
+  - ${{ inputs.headowner }}
+  - '--hs'
+  - ${{ inputs.headsha }}

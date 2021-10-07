@@ -1,5 +1,7 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using CommandLine;
 using Importer;
@@ -17,10 +19,10 @@ namespace RSIDiffBot
     internal class ChangedState
     {
         public string Name;
-        public string OldStatePath;
-        public string NewStatePath;
+        public string? OldStatePath;
+        public string? NewStatePath;
 
-        public ChangedState(string name, string oldStatePath, string newStatePath)
+        public ChangedState(string name, string? oldStatePath, string? newStatePath)
         {
             Name = name;
             OldStatePath = oldStatePath;
@@ -37,20 +39,71 @@ namespace RSIDiffBot
         
         static async Task StartDiffAsync(ActionInputs inputs)
         {
-
             Console.WriteLine($"modified {inputs.Modified}");
             Console.WriteLine($"removed {inputs.Removed}");
             Console.WriteLine($"added {inputs.Added}");
+            
+            var rsiStates = new Dictionary<string, List<ChangedState>>();
 
-            var states = new List<ChangedState>()
+            // yes yes duplication for these 3 lists, oh well
+            foreach (var state in inputs.Modified)
             {
-                new ("test_state", "", "b"),
-                new("test_state_2", "a", "b"),
-                new ("test_state_3", "b", "")
-            };
+                if (state != null)
+                {
+                    if (!Path.HasExtension(".png")) return;
+                    if (!state.Contains(".rsi")) return;
+                    var rsi = Path.GetDirectoryName(state) ?? "fuck";
+                    var list = rsiStates.GetValueOrDefault(rsi);
+                    list?.Add(new ChangedState(
+                            Path.GetFileNameWithoutExtension(state),
+                        GetGitHubRawImageLink(inputs.BaseName, inputs.BaseSha, state),
+                        GetGitHubRawImageLink(inputs.HeadName,  inputs.HeadSha, state)
+                        )
+                    );
+                }
+            }
 
-            var title = $@"This PR makes changes to 1 or more RSIs. Here is a summary of all changes:{Nl}{Nl}";
-            var summary = title + WrapInCollapsible(CreateTable(states), "test.rsi");
+            foreach (var state in inputs.Removed)
+            {
+                if (state != null)
+                {
+                    if (!Path.HasExtension(".png")) return;
+                    if (!state.Contains(".rsi")) return;
+                    var rsi = Path.GetDirectoryName(state) ?? "fuck";
+                    var list = rsiStates.GetValueOrDefault(rsi);
+                    list?.Add(new ChangedState(
+                            Path.GetFileNameWithoutExtension(state),
+                            GetGitHubRawImageLink(inputs.BaseName, inputs.BaseSha, state),
+                            null
+                        )
+                    );
+                }
+            }
+            
+            foreach (var state in inputs.Added)
+            {
+                if (state != null)
+                {
+                    if (!Path.HasExtension(".png")) return;
+                    if (!state.Contains(".rsi")) return;
+                    var rsi = Path.GetDirectoryName(state) ?? "fuck";
+                    var list = rsiStates.GetValueOrDefault(rsi);
+                    list?.Add(new ChangedState(
+                            Path.GetFileNameWithoutExtension(state),
+                            null,
+                            GetGitHubRawImageLink(inputs.HeadName, inputs.HeadSha, state)
+                        )
+                    );
+                }
+            }
+
+            var summary = $@"RSI Diff Bot; head commit {inputs.HeadSha} merging into {inputs.BaseSha}{Nl}";
+            summary += $@"This PR makes changes to 1 or more RSIs. Here is a summary of all changes:{Nl}{Nl}";
+
+            foreach (var kvp in rsiStates)
+            {
+                summary += WrapInCollapsible(CreateTable(kvp.Value), kvp.Key);
+            }
 
             Console.WriteLine($"::set-output name=summary-details::{summary}");
 
@@ -81,15 +134,24 @@ namespace RSIDiffBot
             foreach (var state in states)
             {
                 var status = ModifiedType.Modified;
-                if (state.OldStatePath == string.Empty)
+                if (state.OldStatePath == null)
                     status = ModifiedType.Added;
-                else if (state.NewStatePath == String.Empty)
+                else if (state.NewStatePath == null)
                     status = ModifiedType.Removed;
 
-                str += $@"| {state.Name} | {state.OldStatePath} | {state.NewStatePath} | {status}{Nl}";
+                str += $@"| {state.Name} | ![]({state.OldStatePath}) | ![]({state.NewStatePath}) | {status}{Nl}";
             }
 
             return str;
+        }
+
+        /// <summary>
+        ///     Returns a raw githubusercontent link for a given file at a point in time.
+        /// </summary>
+        static string GetGitHubRawImageLink(string fullName, string sha, string location)
+        {
+            // fullName here is {username}/{name}
+            return $"https://raw.githubusercontent.com/{fullName}/{sha}/{location}";
         }
 
         static async Task Main(string[] args)
@@ -100,7 +162,6 @@ namespace RSIDiffBot
                 {
                     Environment.Exit(2);
                 });
-
 
             await parser.WithParsedAsync(options => StartDiffAsync(options));
         }
