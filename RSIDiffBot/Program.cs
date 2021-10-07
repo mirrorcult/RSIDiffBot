@@ -114,15 +114,8 @@ namespace RSIDiffBot
             var summary = $@"RSI Diff Bot; head commit {inputs.HeadSha} merging into {inputs.BaseSha}{Nl}";
             summary += $@"This PR makes changes to 1 or more RSIs. Here is a summary of all changes:{Nl}{Nl}";
 
-            Console.WriteLine(rsiStates.Count);
             foreach (var kvp in rsiStates)
             {
-                Console.WriteLine(kvp.Key);
-                foreach (var thingy in kvp.Value)
-                {
-                    Console.WriteLine(thingy.Name);
-                    Console.Write(" " + thingy.NewStatePath);
-                }
                 summary += WrapInCollapsible(CreateTable(kvp.Value), kvp.Key);
             }
 
