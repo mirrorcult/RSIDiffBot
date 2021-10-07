@@ -38,57 +38,56 @@ namespace RSIDiffBot
         static async Task StartDiffAsync(ActionInputs inputs)
         {
             var rsiStates = new Dictionary<string, List<ChangedState>>();
+            Console.WriteLine("ahhh");
+
+            var mod = inputs.Modified.Split(" ");
+            var rem = inputs.Removed.Split(" ");
+            var add = inputs.Added.Split(" ");
 
             // yes yes duplication for these 3 lists, oh well
-            foreach (var state in inputs.Modified)
+            foreach (var state in mod)
             {
-                if (state != null)
-                {
-                    if (!Path.HasExtension(".png")) return;
-                    if (!state.Contains(".rsi")) return;
-                    var rsi = Path.GetDirectoryName(state) ?? "fuck";
-                    var list = rsiStates.GetValueOrDefault(rsi);
-                    list?.Add(new ChangedState(
-                            Path.GetFileNameWithoutExtension(state),
-                        GetGitHubRawImageLink(inputs.BaseName, inputs.BaseSha, state),
-                        GetGitHubRawImageLink(inputs.HeadName,  inputs.HeadSha, state)
-                        )
-                    );
-                }
+                Console.WriteLine(state);
+                if (Path.GetExtension(state) != ".png") continue;
+                if (!state.Contains(".rsi")) continue;
+                Console.WriteLine("yes");
+                var rsi = Path.GetDirectoryName(state) ?? "fuck";
+                var list = rsiStates.GetValueOrDefault(rsi);
+                list?.Add(new ChangedState(
+                    Path.GetFileNameWithoutExtension(state),
+                    GetGitHubRawImageLink(inputs.BaseName, inputs.BaseSha, state),
+                    GetGitHubRawImageLink(inputs.HeadName, inputs.HeadSha, state))
+                );
             }
 
-            foreach (var state in inputs.Removed)
+            foreach (var state in rem)
             {
-                if (state != null)
-                {
-                    if (!Path.HasExtension(".png")) return;
-                    if (!state.Contains(".rsi")) return;
-                    var rsi = Path.GetDirectoryName(state) ?? "fuck";
-                    var list = rsiStates.GetValueOrDefault(rsi);
-                    list?.Add(new ChangedState(
-                            Path.GetFileNameWithoutExtension(state),
-                            GetGitHubRawImageLink(inputs.BaseName, inputs.BaseSha, state),
-                            null
-                        )
-                    );
-                }
+                Console.WriteLine(state);
+                if (Path.GetExtension(state) != ".png") continue;
+                if (!state.Contains(".rsi")) continue;
+                Console.WriteLine("yes");
+                var rsi = Path.GetDirectoryName(state) ?? "fuck";
+                var list = rsiStates.GetValueOrDefault(rsi);
+                list?.Add(new ChangedState(
+                    Path.GetFileNameWithoutExtension(state),
+                    GetGitHubRawImageLink(inputs.BaseName, inputs.BaseSha, state),
+                    null)
+                );
             }
             
-            foreach (var state in inputs.Added)
+            foreach (var state in add)
             {
-                if (state != null)
-                {
-                    if (!Path.HasExtension(".png")) return;
-                    if (!state.Contains(".rsi")) return;
-                    var rsi = Path.GetDirectoryName(state) ?? "fuck";
-                    var list = rsiStates.GetValueOrDefault(rsi);
-                    list?.Add(new ChangedState(
-                            Path.GetFileNameWithoutExtension(state),
-                            null,
-                            GetGitHubRawImageLink(inputs.HeadName, inputs.HeadSha, state)
-                        )
-                    );
-                }
+                Console.WriteLine(state);
+                if (Path.GetExtension(state) != ".png") continue;
+                if (!state.Contains(".rsi")) continue;
+                Console.WriteLine("yes");
+                var rsi = Path.GetDirectoryName(state) ?? "fuck";
+                var list = rsiStates.GetValueOrDefault(rsi);
+                list?.Add(new ChangedState(
+                    Path.GetFileNameWithoutExtension(state),
+                    null, 
+                    GetGitHubRawImageLink(inputs.HeadName, inputs.HeadSha, state))
+                );
             }
 
             var summary = $@"RSI Diff Bot; head commit {inputs.HeadSha} merging into {inputs.BaseSha}{Nl}";
@@ -96,12 +95,10 @@ namespace RSIDiffBot
 
             foreach (var kvp in rsiStates)
             {
-                Console.WriteLine($"[{kvp.Key}: {kvp.Value.ToString()}");
                 summary += WrapInCollapsible(CreateTable(kvp.Value), kvp.Key);
             }
 
-            Console.WriteLine($"::set-output name=summary-details::{summary}");
-            Console.WriteLine(summary);
+            Console.WriteLine($@"::set-output name=summary-details::{summary}");
             
             Environment.Exit(0);
         }
@@ -147,7 +144,7 @@ namespace RSIDiffBot
         static string GetGitHubRawImageLink(string fullName, string sha, string location)
         {
             // fullName here is {username}/{name}
-            return $"https://raw.githubusercontent.com/{fullName}/{sha}/{location}";
+            return $@"https://raw.githubusercontent.com/{fullName}/{sha}/{location}";
         }
 
         static async Task Main(string[] args)
