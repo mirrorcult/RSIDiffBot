@@ -40,10 +40,10 @@ runs:
   - '-a'
   - ${{ inputs.added }}
   - '--bn'
-  - ${{ inputs.baseowner }}
+  - ${{ inputs.basename }}
   - '--bs'
   - ${{ inputs.basesha }}
   - '--hn'
-  - ${{ inputs.headowner }}
+  - ${{ inputs.headname }}
   - '--hs'
   - ${{ inputs.headsha }}
