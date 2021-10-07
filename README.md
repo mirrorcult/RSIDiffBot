@@ -6,4 +6,4 @@ changed any RSIs.
 
 ![example](https://i.imgur.com/ZJcBaX2.png)
 
-An example workflow is provided in `.github/workflows/test.yml`. You'll have to tweak it obviously, but that provides everything you need to get started.
+An example workflow is provided in `.github/workflows/example.yml`. You'll have to tweak it obviously, but that provides everything you need to get started.
