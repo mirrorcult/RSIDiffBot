@@ -99,17 +99,15 @@ jobs:
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
+          edit-mode: replace
           body: |
             ${{ steps.diff.outputs.summary-details }}
-          edit-mode: replace
        
       - name: Update comment to read that it has been edited
         if: steps.fc.outputs.comment-id != ''
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
-          body: |
-            
-            Edit: Bot updated diff because of ${{ github.event.pull_request.head.sha }}
           edit-mode: append
-          
+          body: |
+            Edit: Bot updated diff because of ${{ github.event.pull_request.head.sha }}
