@@ -37,10 +37,6 @@ namespace RSIDiffBot
         
         static async Task StartDiffAsync(ActionInputs inputs)
         {
-            Console.WriteLine($"modified {inputs.Modified}");
-            Console.WriteLine($"removed {inputs.Removed}");
-            Console.WriteLine($"added {inputs.Added}");
-            
             var rsiStates = new Dictionary<string, List<ChangedState>>();
 
             // yes yes duplication for these 3 lists, oh well
@@ -100,11 +96,13 @@ namespace RSIDiffBot
 
             foreach (var kvp in rsiStates)
             {
+                Console.WriteLine($"[{kvp.Key}: {kvp.Value.ToString()}");
                 summary += WrapInCollapsible(CreateTable(kvp.Value), kvp.Key);
             }
 
             Console.WriteLine($"::set-output name=summary-details::{summary}");
-
+            Console.WriteLine(summary);
+            
             Environment.Exit(0);
         }
 
