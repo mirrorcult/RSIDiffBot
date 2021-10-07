@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
 using static CommandLine.Parser;
@@ -43,33 +44,45 @@ namespace RSIDiffBot
             var rem = inputs.Removed.Split(" ");
             var add = inputs.Added.Split(" ");
 
+            bool CheckApplicable(string state)
+            {
+                if (Path.GetExtension(state) != ".png") return false;
+                if (!state.Contains(".rsi")) return false;
+                return true;
+            }
+
+            void AddToRsiStates(string key, ChangedState value)
+            {
+                if (rsiStates.TryGetValue(key, out var val))
+                {
+                    val.Add(value);
+                    rsiStates[key] = val;
+                }
+                else
+                {
+                    rsiStates.Add(key, new List<ChangedState>() { value });
+                }
+            }
+
             // yes yes duplication for these 3 lists, oh well
             foreach (var state in mod)
             {
-                if (Path.GetExtension(state) != ".png") continue;
-                if (!state.Contains(".rsi")) continue;
+                if (!CheckApplicable(state)) continue;
+                
                 var rsi = Path.GetDirectoryName(state) ?? "fuck";
                 var changed = new ChangedState(
                     Path.GetFileNameWithoutExtension(state),
                     GetGitHubRawImageLink(inputs.BaseName, inputs.BaseSha, state),
                     GetGitHubRawImageLink(inputs.HeadName, inputs.HeadSha, state)
                 );
-                
-                if (rsiStates.TryGetValue(rsi, out var val))
-                {
-                    val.Add(changed);
-                    rsiStates[rsi] = val;
-                }
-                else
-                {
-                    rsiStates.Add(rsi, new List<ChangedState>() { changed });
-                }
+
+                AddToRsiStates(rsi, changed);
             }
 
             foreach (var state in rem)
             {
-                if (Path.GetExtension(state) != ".png") continue;
-                if (!state.Contains(".rsi")) continue;
+                if (!CheckApplicable(state)) continue;
+                
                 var rsi = Path.GetDirectoryName(state) ?? "fuck";
                 var changed = new ChangedState(
                     Path.GetFileNameWithoutExtension(state),
@@ -77,21 +90,12 @@ namespace RSIDiffBot
                     null
                 );
                 
-                if (rsiStates.TryGetValue(rsi, out var val))
-                {
-                    val.Add(changed);
-                    rsiStates[rsi] = val;
-                }
-                else
-                {
-                    rsiStates.Add(rsi, new List<ChangedState>() { changed });
-                }
+                AddToRsiStates(rsi, changed);
             }
             
             foreach (var state in add)
             {
-                if (Path.GetExtension(state) != ".png") continue;
-                if (!state.Contains(".rsi")) continue;
+                if (!CheckApplicable(state)) continue;
                 
                 var rsi = Path.GetDirectoryName(state) ?? "fuck";
                 var changed = new ChangedState(
@@ -100,26 +104,19 @@ namespace RSIDiffBot
                     GetGitHubRawImageLink(inputs.HeadName, inputs.HeadSha, state)
                     );
                 
-                if (rsiStates.TryGetValue(rsi, out var val))
-                {
-                    val.Add(changed);
-                    rsiStates[rsi] = val;
-                }
-                else
-                {
-                    rsiStates.Add(rsi, new List<ChangedState>() { changed });
-                }
+                AddToRsiStates(rsi, changed);
             }
 
-            var summary = $@"RSI Diff Bot; head commit {inputs.HeadSha} merging into {inputs.BaseSha}{Nl}";
-            summary += $@"This PR makes changes to 1 or more RSIs. Here is a summary of all changes:{Nl}{Nl}";
+            var sb = new StringBuilder();
+            sb.Append($@"RSI Diff Bot; head commit {inputs.HeadSha} merging into {inputs.BaseSha}{Nl}");
+            sb.Append($@"This PR makes changes to 1 or more RSIs. Here is a summary of all changes:{Nl}{Nl}");
 
             foreach (var kvp in rsiStates)
             {
-                summary += WrapInCollapsible(CreateTable(kvp.Value), kvp.Key);
+                sb.Append(WrapInCollapsible(CreateTable(kvp.Value), kvp.Key));
             }
 
-            Console.WriteLine($@"::set-output name=summary-details::{summary}");
+            Console.WriteLine($@"::set-output name=summary-details::{sb.ToString()}");
             
             Environment.Exit(0);
         }
@@ -132,8 +129,10 @@ namespace RSIDiffBot
         /// <returns>The wrapped string.</returns>
         static string WrapInCollapsible(string markdown, string title)
         {
-            var str = $@"<details><summary>{title}</summary>{Nl}<p>{Nl}{Nl}" + markdown;
-            return str + $@"{Nl}{Nl}</p>{Nl}</details>";
+            var sb = new StringBuilder();
+            sb.Append($@"<details><summary>{title}</summary>{Nl}<p>{Nl}{Nl}" + markdown);
+            sb.Append($@"{Nl}{Nl}</p>{Nl}</details>");
+            return sb.ToString();
         }
 
         /// <summary>
@@ -143,7 +142,8 @@ namespace RSIDiffBot
         /// <returns>A string with a formatted markdown table.</returns>
         static string CreateTable(IEnumerable<ChangedState> states)
         {
-            var str = $@"| State | Old | New | Status{Nl}| --- | --- | --- | --- |{Nl}";
+            var sb = new StringBuilder();
+            sb.Append($@"| State | Old | New | Status{Nl}| --- | --- | --- | --- |{Nl}");
 
             foreach (var state in states)
             {
@@ -153,10 +153,10 @@ namespace RSIDiffBot
                 else if (state.NewStatePath == null)
                     status = ModifiedType.Removed;
 
-                str += $@"| {state.Name} | ![]({state.OldStatePath}) | ![]({state.NewStatePath}) | {status}{Nl}";
+                sb.Append($@"| {state.Name} | ![]({state.OldStatePath}) | ![]({state.NewStatePath}) | {status}{Nl}");
             }
 
-            return str;
+            return sb.ToString();
         }
 
         /// <summary>
