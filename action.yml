@@ -1,8 +1,8 @@
 name: 'RSI Diff Bot'
 description: 'Shows modified states in any changed Robust Station Images.'
 branding:
-  icon: columns
-  color: green
+  icon: activity
+  color: red
 inputs:
   modified:
     description:
