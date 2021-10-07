@@ -15,16 +15,16 @@ inputs:
       'A list of changed files.'
   basename:
     description:
-      'The base repository's full name, {username}/{reponame}.'
+      'The base repository full name, username/reponame.'
   basesha:
     description:
-      'The base branch's commit hash.'
+      'The base branch commit hash.'
   headname:
     description:
-      'The head repository's full name, {username}/{reponame}.'
+      'The head repository full name, username/reponame.'
   headsha:
     description:
-      'The head branch's commit hash.'
+      'The head branch commit hash.'
 outputs:
   summary-details:
     description:
