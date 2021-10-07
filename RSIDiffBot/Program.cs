@@ -1,10 +1,8 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using CommandLine;
-using Importer;
 using static CommandLine.Parser;
 
 namespace RSIDiffBot
