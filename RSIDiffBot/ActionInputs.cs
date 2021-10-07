@@ -8,18 +8,18 @@ namespace RSIDiffBot
     {
         [Option('m', "modified",
             Required = false,
-            HelpText = "A list of modified files.")]
-        public IEnumerable<string> Modified { get; set; } = null!;
+            HelpText = "A list of modified files, space delimited.")]
+        public string Modified { get; set; } = String.Empty;
         
         [Option('r', "removed",
             Required = false,
-            HelpText = "A list of removed files.")]
-        public IEnumerable<string> Removed { get; set; } = null!;
+            HelpText = "A list of removed files, space delimited.")]
+        public string Removed { get; set; } = String.Empty;
         
         [Option('a', "added",
             Required = false,
-            HelpText = "A list of added files.")]
-        public IEnumerable<string> Added { get; set; } = null!;
+            HelpText = "A list of added files, space delimited.")]
+        public string Added { get; set; } = String.Empty;
 
         // for dummies like me
         // base = merging into
